@@ -1,3 +1,11 @@
 @tailwind base;
 @tailwind components;
 @tailwind utilities;
+
+@layer base {
+  .gradient-text {
+    -webkit-background-clip: text;
+    -webkit-text-fill-color: transparent;
+    @apply bg-gradient-to-r from-[#3B0057] to-[#6D0000];
+  }
+}
