@@ -8,4 +8,7 @@
     -webkit-text-fill-color: transparent;
     @apply bg-gradient-to-r from-[#3B0057] to-[#6D0000];
   }
+  input[type="file"]{
+    display: none;
+  }
 }
