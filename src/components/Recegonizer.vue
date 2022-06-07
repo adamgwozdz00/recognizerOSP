@@ -16,8 +16,14 @@
        <div 
     :class="{ 'opacity-0': !recegonizerExpanded }"
     @click="collapse()">
-    <input type="file" id="file" accept="image/*">
-    <label for="file" class="text-white px-5 py-2.5 bg-gradient-to-r from-[#3B0057] to-[#6D0000] uppercase rounded-full mt-5 cursor-pointer">Choose photo</label>
+    </div>
+    <div class="flex" style="flex-direction: column;">
+      <div >
+        <input type="file" id="file" accept="image/*" ref="file">
+        <label for="file" class="text-white px-5 py-2.5 bg-gradient-to-r from-[#3B0057] to-[#6D0000] uppercase rounded-full mt-5 cursor-pointer">Choose photo</label>
+        <button type='button' class="text-white px-5 py-2.5 bg-gradient-to-r from-[#3B0057] to-[#6D0000] uppercase rounded-full mt-5 cursor-pointer" @click="uploadImage">upload</button>
+      </div>
+        <span class="text-white text-3xl font-extrabold uppercase rounded-full mt-5 cursor-pointer">{{recognitionResult}}</span>
     </div>
       </div>
     </div>
@@ -31,10 +37,19 @@
 </template>
 
 <script>
+import httpService from "../data_access/http.service"
 export default {
   props: {
     recegonizerExpanded: false,
+   
   },
+
+  data() {
+    return{
+      recognitionResult: ""
+    }
+  },
+  
   methods: {
     emitCollapse() {
       this.$emit("collapse", true);
@@ -42,6 +57,21 @@ export default {
     collapse() {
       this.emitCollapse();
     },
+    async uploadImage(){
+      const file  = this.$refs.file.files[0];
+      if(file == undefined) {
+        console.error("Problem while posting image...")
+        return;
+      }
+      const response = await httpService.post(file);
+      
+      if(!response.data["success"]){
+        return;
+      }
+
+      this.recognitionResult = response.data["recognition"] + " accuracy: " + response.data["percentage"];
+
+    }
   },
 };
 </script>
