@@ -9,22 +9,51 @@
         <span class="inline-block gradient-text mr-2 text-3xl font-extrabold group-hover:-translate-x-2 transition duration-200" v-html="'<'"> </span>
         <span>nazot</span>
       </button>
-      <!-- clearfix -->
     </div>
     <div class="flex-1 p-10 flex justify-center items-center h-full">
-      <div class="h-full max-h-[500px] mx-auto aspect-square rounded-xl border-2 border-solid border-white/50 justify-center flex items-center" >
-       <div 
-    :class="{ 'opacity-0': !recegonizerExpanded }"
-    @click="collapse()">
-    </div>
-    <div class="flex" style="flex-direction: column;">
-      <div >
-        <input type="file" id="file" accept="image/*" ref="file">
-        <label for="file" class="text-white px-5 py-2.5 bg-gradient-to-r from-[#3B0057] to-[#6D0000] uppercase rounded-full mt-5 cursor-pointer">Choose photo</label>
-        <button type='button' class="text-white px-5 py-2.5 bg-gradient-to-r from-[#3B0057] to-[#6D0000] uppercase rounded-full mt-5 cursor-pointer" @click="uploadImage">upload</button>
-      </div>
-        <span class="text-white text-3xl font-extrabold uppercase rounded-full mt-5 cursor-pointer">{{recognitionResult}}</span>
-    </div>
+      <div
+        class="group h-full max-h-[500px] relative mx-auto aspect-square rounded-xl border-2 border-solid border-white/50 overflow-hidden justify-center flex items-center"
+      >
+        <input
+          v-if="!fileSelected"
+          class="block absolute inset-0 cursor-pointer opacity-0 z-10"
+          type="file"
+          id="file"
+          accept="image/*"
+          ref="file"
+          @change="imageSelected()"
+        />
+        <img ref="image" class="block absolute inset-0 w-full h-full" src="" :class="fileSelected ? 'opacity-20' : 'opacity-0'" />
+        <div
+          class="flex flex-col justify-center items-center z-20 transition duration-300"
+          :class="recegonizerExpanded ? (fileSelected ? '' : 'pointer-events-none') : 'pointer-events-none opacity-0'"
+        >
+          <div class="w-28 relative transition-all duration-300 pointer-events-none overflow-hidden" :class="fileSelected ? 'h-0' : 'h-28'">
+            <svg
+              class="w-28 h-28 transition duration-200 fill-white/50 group-hover:fill-white pointer-events-none"
+              width="24px"
+              height="24px"
+              viewBox="0 0 24 24"
+              xmlns="http://www.w3.org/2000/svg"
+            >
+              <rect x="0" fill="none" width="24" height="24" />
+              <g>
+                <path
+                  d="M23 4v2h-3v3h-2V6h-3V4h3V1h2v3h3zm-8.5 7c.828 0 1.5-.672 1.5-1.5S15.328 8 14.5 8 13 8.672 13 9.5s.672 1.5 1.5 1.5zm3.5 3.234l-.513-.57c-.794-.885-2.18-.885-2.976 0l-.655.73L9 9l-3 3.333V6h7V4H6c-1.105 0-2 .895-2 2v12c0 1.105.895 2 2 2h12c1.105 0 2-.895 2-2v-7h-2v3.234z"
+                />
+              </g>
+            </svg>
+          </div>
+          <button
+            type="button"
+            class="text-white transition-all duration-300 px-5 bg-gradient-to-r from-[#3B0057] to-[#6D0000] uppercase rounded-full cursor-pointer overflow-hidden"
+            :class="fileSelected ? 'h-11 py-2.5' : 'h-0'"
+            @click="uploadImage"
+          >
+            upload
+          </button>
+          <span class="text-white text-3xl font-extrabold uppercase rounded-full mt-5 cursor-pointer">{{ recognitionResult }}</span>
+        </div>
       </div>
     </div>
     <div class="flex basis-[250px] py-5">
@@ -37,19 +66,19 @@
 </template>
 
 <script>
-import httpService from "../data_access/http.service"
+import httpService from "../data_access/http.service";
 export default {
   props: {
     recegonizerExpanded: false,
-   
   },
 
   data() {
-    return{
-      recognitionResult: ""
-    }
+    return {
+      fileSelected: false,
+      recognitionResult: "",
+    };
   },
-  
+
   methods: {
     emitCollapse() {
       this.$emit("collapse", true);
@@ -57,21 +86,25 @@ export default {
     collapse() {
       this.emitCollapse();
     },
-    async uploadImage(){
-      const file  = this.$refs.file.files[0];
-      if(file == undefined) {
-        console.error("Problem while posting image...")
+    imageSelected() {
+      this.fileSelected = this.$refs.file.files[0];
+      console.log(this.$refs);
+      this.$refs.image.src = URL.createObjectURL(this.fileSelected);
+    },
+    async uploadImage() {
+      const file = this.fileSelected;
+      if (file == undefined) {
+        console.error("Problem while posting image...");
         return;
       }
       const response = await httpService.post(file);
-      
-      if(!response.data["success"]){
+
+      if (!response.data["success"]) {
         return;
       }
 
       this.recognitionResult = response.data["recognition"] + " accuracy: " + response.data["percentage"];
-
-    }
+    },
   },
 };
 </script>
