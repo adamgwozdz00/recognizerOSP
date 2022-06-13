@@ -1,6 +1,7 @@
 <template>
   <div class="w-full h-full flex">
-    <div class="basis-[250px]">
+    <!-- TODO: FIX RWD -->
+    <div class="basis-[250px] grow-0">
       <button
         class="group mt-10 text-xl text-white p-1 ml-4 transition duration-500"
         :class="{ 'opacity-0': !recegonizerExpanded }"
@@ -10,25 +11,35 @@
         <span>nazot</span>
       </button>
     </div>
-    <div class="flex-1 p-10 flex justify-center items-center h-full">
+    <div class="shrink-0 grow p-10 flex justify-center items-center h-full">
       <div
-        class="group h-full max-h-[500px] relative mx-auto aspect-square rounded-xl border-2 border-solid border-white/50 overflow-hidden justify-center flex items-center"
+        class="h-full max-h-[500px] relative mx-auto aspect-square rounded-xl border-2 border-solid border-white/50 overflow-hidden justify-center flex items-center"
+        :class="{ group: !fileSelected }"
       >
         <input
           v-if="!fileSelected"
-          class="block absolute inset-0 cursor-pointer opacity-0 z-10"
+          class="block absolute inset-0 opacity-0 z-10"
           type="file"
           id="file"
           accept="image/*"
           ref="file"
-          @change="imageSelected()"
+          @change="imageSelect()"
+          :class="recegonizerExpanded ? 'cursor-pointer' : 'pointer-events-none'"
         />
-        <img ref="image" class="block absolute inset-0 w-full h-full" src="" :class="fileSelected ? 'opacity-20' : 'opacity-0'" />
+        <img
+          ref="image"
+          class="block absolute inset-0 w-full h-full transition duration-300"
+          src=""
+          :class="fileSelected && recegonizerExpanded ? 'opacity-20' : 'opacity-0'"
+        />
         <div
-          class="flex flex-col justify-center items-center z-20 transition duration-300"
+          class="relative w-[158px] flex flex-col justify-center items-center z-20 transition duration-300"
           :class="recegonizerExpanded ? (fileSelected ? '' : 'pointer-events-none') : 'pointer-events-none opacity-0'"
         >
-          <div class="w-28 relative transition-all duration-300 pointer-events-none overflow-hidden" :class="fileSelected ? 'h-0' : 'h-28'">
+          <div
+            class="w-28 h-28 relative transition-all duration-500 pointer-events-none overflow-hidden"
+            :class="{ 'scale-150 opacity-0 blur-sm': fileSelected }"
+          >
             <svg
               class="w-28 h-28 transition duration-200 fill-white/50 group-hover:fill-white pointer-events-none"
               width="24px"
@@ -44,19 +55,30 @@
               </g>
             </svg>
           </div>
-          <button
-            type="button"
-            class="text-white transition-all duration-300 px-5 bg-gradient-to-r from-[#3B0057] to-[#6D0000] uppercase rounded-full cursor-pointer overflow-hidden"
-            :class="fileSelected ? 'h-11 py-2.5' : 'h-0'"
-            @click="uploadImage"
+          <div
+            class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center transform transition duration-300"
+            :class="fileSelected ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
           >
-            upload
-          </button>
+            <button
+              type="button"
+              class="group text-white transition-all duration-300 hover:shadow-2xl shadow-[#6F0000] px-5 py-2.5 bg-gradient-to-r from-[#3B0057] to-[#6D0000] uppercase rounded-full cursor-pointer overflow-hidden"
+              @click="uploadImage"
+            >
+              Find śrubki <span class="inline-block transform transition duration-300 group-hover:rotate-12 group-hover:translate-x-1">🔍</span>
+            </button>
+            <button
+              type="button"
+              class="text-white/60 group transition-all py-2 mt-5 border duration-300 px-2.5 text-xs border-solid border-[#3B0057] bg-gray-700/30 hover:bg-gray-700/60 uppercase rounded-full cursor-pointer overflow-hidden"
+              @click="imageUnselect"
+            >
+              Remove image <span class="inline-block transform transition duration-300 group-hover:rotate-90">❌</span>
+            </button>
+          </div>
           <span class="text-white text-3xl font-extrabold uppercase rounded-full mt-5 cursor-pointer">{{ recognitionResult }}</span>
         </div>
       </div>
     </div>
-    <div class="flex basis-[250px] py-5">
+    <div class="flex basis-[250px] grow-0 py-5">
       <div
         class="w-0.5 h-full bg-gradient-to-b from-[#3B0057] to-[#6D0000]/50 transition duration-500"
         :class="{ 'opacity-0': !recegonizerExpanded }"
@@ -86,10 +108,12 @@ export default {
     collapse() {
       this.emitCollapse();
     },
-    imageSelected() {
+    imageSelect() {
       this.fileSelected = this.$refs.file.files[0];
-      console.log(this.$refs);
       this.$refs.image.src = URL.createObjectURL(this.fileSelected);
+    },
+    imageUnselect() {
+      this.fileSelected = false;
     },
     async uploadImage() {
       const file = this.fileSelected;

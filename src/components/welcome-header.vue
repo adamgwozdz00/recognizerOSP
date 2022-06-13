@@ -1,7 +1,7 @@
 <template>
   <div class="py-10 px-5 flex flex-col justify-center items-center w-full h-full transition duration-500">
     <h1 class="mb-4 ml-5 text-5xl xl:text-7xl text-white">Znajdowarka</h1>
-    <p class="text-xl text-white">Find rzeczy, return Krupniok get szpajza with AI</p>
+    <p class="text-xl text-white whitespace-nowrap">Find rzeczy, return Krupniok get szpajza with AI 🤖</p>
     <button
       class="p-0.5 mt-10 bg-gradient-to-r from-[#3B0057] to-[#6D0000] shadow-xl hover:shadow-md transition duration-300 rounded-full"
       @click="emitClick()"
