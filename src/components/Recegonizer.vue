@@ -13,9 +13,12 @@
     </div>
     <div class="shrink-0 grow p-10 flex justify-center items-center h-full">
       <div
-        class="h-full max-h-[500px] relative mx-auto aspect-square rounded-xl border-2 border-solid border-white/50 overflow-hidden justify-center flex items-center"
-        :class="{ group: !fileSelected }"
+        class="h-full max-h-[500px] relative mx-auto transition duration-500 aspect-square rounded-xl border-2 border-solid border-white/50 overflow-hidden justify-center flex items-center"
+        :class="{ 'group hover:bg-[#3B0057]/10': !fileSelected && recegonizerExpanded }"
       >
+        <div class="absolute inset-0 transition duration-500" :class="{ 'opacity-0': recegonizerExpanded }">
+          <RecegonizerPlaceholder />
+        </div>
         <input
           v-if="!fileSelected"
           class="block absolute inset-0 opacity-0 z-10"
@@ -24,7 +27,7 @@
           accept="image/*"
           ref="file"
           @change="imageSelect()"
-          :class="recegonizerExpanded ? 'cursor-pointer' : 'pointer-events-none'"
+          :class="recegonizerExpanded ? 'cursor-pointer ' : 'pointer-events-none'"
         />
         <img
           ref="image"
@@ -34,7 +37,7 @@
         />
         <div
           class="relative w-[158px] flex flex-col justify-center items-center z-20 transition duration-300"
-          :class="recegonizerExpanded ? (fileSelected ? '' : 'pointer-events-none') : 'pointer-events-none opacity-0'"
+          :class="recegonizerExpanded ? (fileSelected ? '' : 'pointer-events-none ') : 'pointer-events-none opacity-0'"
         >
           <div
             class="w-28 h-28 relative transition-all duration-500 pointer-events-none overflow-hidden"
@@ -88,10 +91,15 @@
 </template>
 
 <script>
+import RecegonizerPlaceholder from "./recegonizer-placeholder.vue";
+
 import httpService from "../data_access/http.service";
 export default {
   props: {
     recegonizerExpanded: false,
+  },
+  components: {
+    RecegonizerPlaceholder,
   },
 
   data() {
@@ -114,6 +122,7 @@ export default {
     },
     imageUnselect() {
       this.fileSelected = false;
+      this.$refs.image.src = "";
     },
     async uploadImage() {
       const file = this.fileSelected;
