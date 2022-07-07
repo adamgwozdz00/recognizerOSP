@@ -107,6 +107,23 @@
             <p class="text-2xl text-white">~ {{ recognitionTime }}</p>
           </div>
         </div>
+        <div
+          class="mx-5 w-full min-w-[206px] transition-all duration-300"
+          :class="recegonizerExpanded && !fileSelected ? '' : 'opacity-0 pointer-events-none'"
+        >
+          <p class="text-white overflow-hidden w-full">
+            To run Recegonizer upload an image by clicking
+            <svg class="inline w-5 h-5 fill-white" width="12px" height="12px" viewBox="0 0 24 24" xmlns="http://www.w3.org/2000/svg">
+              <rect x="0" fill="none" width="24" height="24" />
+              <g>
+                <path
+                  d="M23 4v2h-3v3h-2V6h-3V4h3V1h2v3h3zm-8.5 7c.828 0 1.5-.672 1.5-1.5S15.328 8 14.5 8 13 8.672 13 9.5s.672 1.5 1.5 1.5zm3.5 3.234l-.513-.57c-.794-.885-2.18-.885-2.976 0l-.655.73L9 9l-3 3.333V6h7V4H6c-1.105 0-2 .895-2 2v12c0 1.105.895 2 2 2h12c1.105 0 2-.895 2-2v-7h-2v3.234z"
+                />
+              </g>
+            </svg>
+            icon or by dragging an image into the container.
+          </p>
+        </div>
         <button
           class="w-24 mx-auto text-white transition-all duration-300 hover:shadow-2xl shadow-[#6F0000] px-5 py-2.5 bg-gradient-to-r from-[#3B0057] to-[#6D0000] uppercase rounded-full cursor-pointer overflow-hidden"
           :class="!recognitionCompleted || !recegonizerExpanded ? 'opacity-0 pointer-events-none' : 'opacity-80 hover:opacity-100'"
