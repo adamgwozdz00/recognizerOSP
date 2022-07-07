@@ -39,7 +39,15 @@
           ref="image"
           class="block absolute inset-0 w-full h-full transition duration-300"
           src=""
-          :class="fileSelected && recegonizerExpanded ? (recognitionWorking ? 'opacity-100' : 'opacity-20') : 'opacity-0'"
+          :class="
+            fileSelected && recegonizerExpanded
+              ? recognitionWorking
+                ? 'opacity-100'
+                : recognitionCompleted
+                ? 'opacity-100'
+                : 'opacity-20'
+              : 'opacity-0'
+          "
         />
         <div
           class="relative w-[158px] flex flex-col justify-center items-center z-20 transition duration-300"
@@ -88,13 +96,24 @@
     </div>
     <div class="flex basis-[250px] grow-0 py-5 overflow-hidden transition duration-500" :class="{ 'opacity-0': !recegonizerExpanded }">
       <div class="w-0.5 h-full bg-gradient-to-b from-[#3B0057] to-[#6D0000]/50"></div>
-      <div class="ml-5 mt-5 whitespace-nowrap">
-        <p class="transition duration-300 text-xl text-white font-light" :class="{ 'opacity-0': !recognitionWorking }">Please wait ...</p>
+      <div class="w-full h-full flex flex-col justify-between">
+        <div class="ml-5 mt-5 whitespace-nowrap">
+          <p class="transition duration-300 text-xl text-white font-light" :class="!recognitionWorking ? 'opacity-0' : 'animate-pulse'">
+            Please wait ...
+          </p>
 
-        <div class="transition duration-300" :class="{ 'opacity-0': !recognitionTime }">
-          <p class="text-xl text-white font-light">Elapsed time:</p>
-          <p class="text-2xl text-white">~ {{ recognitionTime }}</p>
+          <div class="transition duration-300" :class="{ 'opacity-0': !recognitionTime }">
+            <p class="text-xl text-white font-light">Elapsed time:</p>
+            <p class="text-2xl text-white">~ {{ recognitionTime }}</p>
+          </div>
         </div>
+        <button
+          class="w-24 mx-auto text-white transition-all duration-300 hover:shadow-2xl shadow-[#6F0000] px-5 py-2.5 bg-gradient-to-r from-[#3B0057] to-[#6D0000] uppercase rounded-full cursor-pointer overflow-hidden"
+          :class="!recognitionCompleted || !recegonizerExpanded ? 'opacity-0 pointer-events-none' : 'opacity-80 hover:opacity-100'"
+          @click="clear()"
+        >
+          Clear
+        </button>
       </div>
     </div>
   </div>
@@ -150,7 +169,7 @@ export default {
       var response = await httpService.get();
       console.log(response.data.image);
       if (response.data.success == true) {
-        this.$refs.image.src = "data:image/png;base64,"+ response.data.image;
+        this.$refs.image.src = "data:image/png;base64," + response.data.image;
         this.recognitionCompleted = true;
         this.recognitionWorking = false;
         this.recognitionTime = response.time;
@@ -159,6 +178,11 @@ export default {
         this.recognitionWorking = false;
         this.recognitionTime = "";
       }
+    },
+    clear() {
+      this.recognitionTime = "";
+      this.recognitionCompleted = false;
+      this.imageUnselect();
     },
   },
 };
