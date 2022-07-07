@@ -4,7 +4,7 @@
     <div class="basis-[250px] grow-0">
       <button
         class="group mt-10 text-xl text-white p-1 ml-4 transition duration-500"
-        :class="{ 'opacity-0': !recegonizerExpanded }"
+        :class="{ 'opacity-0 pointer-events-none': !recegonizerExpanded || recognitionWorking }"
         @click="collapse()"
       >
         <span class="inline-block gradient-text mr-2 text-3xl font-extrabold group-hover:-translate-x-2 transition duration-200" v-html="'<'"> </span>
@@ -18,6 +18,12 @@
       >
         <div class="absolute inset-0 transition duration-500" :class="{ 'opacity-0': recegonizerExpanded }">
           <RecegonizerPlaceholder />
+        </div>
+        <div
+          class="absolute scanning z-20 inset-0 -top-10 -bottom-5 transition duration-500 pointer-events-none"
+          :class="{ 'opacity-0': !recegonizerExpanded || !recognitionWorking }"
+        >
+          <div class="w-full h-24 bg-gradient-to-b from-[#6D0000]/50 to-transparent top-0 left-0"></div>
         </div>
         <input
           v-if="!fileSelected"
@@ -33,7 +39,7 @@
           ref="image"
           class="block absolute inset-0 w-full h-full transition duration-300"
           src=""
-          :class="fileSelected && recegonizerExpanded ? 'opacity-20' : 'opacity-0'"
+          :class="fileSelected && recegonizerExpanded ? (recognitionWorking ? 'opacity-100' : 'opacity-20') : 'opacity-0'"
         />
         <div
           class="relative w-[158px] flex flex-col justify-center items-center z-20 transition duration-300"
@@ -60,7 +66,7 @@
           </div>
           <div
             class="absolute top-0 left-0 w-full h-full flex flex-col justify-center items-center transform transition duration-300"
-            :class="fileSelected ? 'scale-100 opacity-100' : 'scale-50 opacity-0'"
+            :class="fileSelected && !recognitionWorking && !recognitionCompleted ? 'scale-100 opacity-100' : 'scale-50 opacity-0 pointer-events-none'"
           >
             <button
               type="button"
@@ -77,15 +83,19 @@
               Remove image <span class="inline-block transform transition duration-300 group-hover:rotate-90">❌</span>
             </button>
           </div>
-          <span class="text-white text-3xl font-extrabold uppercase rounded-full mt-5 cursor-pointer">{{ recognitionResult }}</span>
         </div>
       </div>
     </div>
-    <div class="flex basis-[250px] grow-0 py-5">
-      <div
-        class="w-0.5 h-full bg-gradient-to-b from-[#3B0057] to-[#6D0000]/50 transition duration-500"
-        :class="{ 'opacity-0': !recegonizerExpanded }"
-      ></div>
+    <div class="flex basis-[250px] grow-0 py-5 overflow-hidden transition duration-500" :class="{ 'opacity-0': !recegonizerExpanded }">
+      <div class="w-0.5 h-full bg-gradient-to-b from-[#3B0057] to-[#6D0000]/50"></div>
+      <div class="ml-5 mt-5 whitespace-nowrap">
+        <p class="transition duration-300 text-xl text-white font-light" :class="{ 'opacity-0': !recognitionWorking }">Please wait ...</p>
+
+        <div class="transition duration-300" :class="{ 'opacity-0': !recognitionTime }">
+          <p class="text-xl text-white font-light">Elapsed time:</p>
+          <p class="text-2xl text-white">~ {{ recognitionTime }}</p>
+        </div>
+      </div>
     </div>
   </div>
 </template>
@@ -105,7 +115,9 @@ export default {
   data() {
     return {
       fileSelected: false,
-      recognitionResult: "",
+      recognitionWorking: false,
+      recognitionCompleted: false,
+      recognitionTime: "",
     };
   },
 
@@ -125,21 +137,45 @@ export default {
       this.$refs.image.src = "";
     },
     async uploadImage() {
+      this.recognitionWorking = true;
+      this.recognitionTime = "";
       const file = this.fileSelected;
       if (file == undefined) {
         console.error("Problem while posting image...");
+        (this.recognitionCompleted = false), (this.recognitionWorking = false);
         return;
       }
-      const response = await httpService.post(file);
+      await httpService.post(file);
 
-      if (!response.data["success"]) {
-        return;
+      var response = await httpService.get();
+      console.log(response);
+      if (response.data.success == undefined) {
+        this.$refs.image.src = "data:image/jpeg;base64,";
+        //  + response.data;
+        this.recognitionCompleted = true;
+        this.recognitionWorking = false;
+        this.recognitionTime = response.time;
+      } else {
+        this.recognitionCompleted = false;
+        this.recognitionWorking = false;
+        this.recognitionTime = "";
       }
-
-      this.recognitionResult = response.data["recognition"] + " accuracy: " + response.data["percentage"];
     },
   },
 };
 </script>
 
-<style></style>
+<style>
+@keyframes scanningAnimation {
+  from {
+    transform: translateY(0%);
+  }
+  to {
+    transform: translateY(100%);
+  }
+}
+
+.scanning {
+  animation: scanningAnimation 2s alternate infinite ease-in-out;
+}
+</style>
