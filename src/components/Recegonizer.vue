@@ -148,10 +148,9 @@ export default {
       await httpService.post(file);
 
       var response = await httpService.get();
-      console.log(response);
-      if (response.data.success == undefined) {
-        this.$refs.image.src = "data:image/jpeg;base64,";
-        //  + response.data;
+      console.log(response.data.image);
+      if (response.data.success == true) {
+        this.$refs.image.src = "data:image/png;base64,"+ response.data.image;
         this.recognitionCompleted = true;
         this.recognitionWorking = false;
         this.recognitionTime = response.time;

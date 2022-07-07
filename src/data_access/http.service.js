@@ -27,12 +27,12 @@ class HttpService {
         axios.get(this.url, this.config).then((res) => {
           data = res.data;
         });
-        if (data.success == undefined) {
+        if (data.success == true) {
           console.log(data);
           clearInterval(interval);
           resolve({ data: data, time: (i * 0.2).toFixed(1) + "s" });
         }
-        if (i == 100) {
+        if (i == 1000) {
           alert("Timeout");
           clearInterval(interval);
           resolve({ data: data, time: (i * 0.2).toFixed(1) + "s" });
